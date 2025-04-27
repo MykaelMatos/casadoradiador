@@ -55,6 +55,15 @@ interface User {
   password: string;
 }
 
+// Interface para o formulário de usuário
+interface UserFormState {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "manager" | "employee";
+  password: string;
+}
+
 const AdminConfig = () => {
   const { user, isAdmin } = useAuth();
   const { stores, updateStore, deleteStore } = useStore();
@@ -77,7 +86,7 @@ const AdminConfig = () => {
         id: "1",
         name: "Mykael",
         email: "mykael@admin.com",
-        role: "admin",
+        role: "admin" as const,
         password: "Mkm201015"
       }
     ];
@@ -85,7 +94,7 @@ const AdminConfig = () => {
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
   
   // Estado para formulários
-  const [userForm, setUserForm] = useState({
+  const [userForm, setUserForm] = useState<UserFormState>({
     id: "",
     name: "",
     email: "",
@@ -136,9 +145,11 @@ const AdminConfig = () => {
   };
 
   const handleUserRoleChange = (value: string) => {
+    // Ensure role is one of the allowed values
+    const role = value as "admin" | "manager" | "employee";
     setUserForm({
       ...userForm,
-      role: value as "admin" | "manager" | "employee"
+      role
     });
   };
 
@@ -155,7 +166,7 @@ const AdminConfig = () => {
       toast.success(`Usuário ${userForm.name} atualizado com sucesso!`);
     } else {
       // Criação
-      const newUser = {
+      const newUser: User = {
         ...userForm,
         id: Math.random().toString(36).substr(2, 9)
       };
