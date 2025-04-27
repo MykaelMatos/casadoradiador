@@ -1,13 +1,5 @@
-
 import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Product, addProduct, updateProduct, deleteProduct } from "@/utils/stockUtils";
 import { useStore } from "@/contexts/StoreContext";
 import { toast } from "sonner";
+import ExcelImportExport from "./ExcelImportExport";
 
 const InventoryTable = () => {
   const { currentStore } = useStore();
@@ -43,7 +36,6 @@ const InventoryTable = () => {
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
   
-  // Estado para formulário de produto
   const [formData, setFormData] = useState({
     code: "",
     name: "",
@@ -168,7 +160,21 @@ const InventoryTable = () => {
             className="max-w-sm"
           />
         </div>
-        <Button onClick={openNewProductDialog}>Novo Produto</Button>
+        <div className="flex gap-2">
+          <ExcelImportExport 
+            products={products}
+            onImportComplete={() => {
+              if (currentStore) {
+                const storedProducts = localStorage.getItem("inventory_products");
+                if (storedProducts) {
+                  const allProducts = JSON.parse(storedProducts);
+                  setProducts(allProducts.filter((p: Product) => p.storeId === currentStore.id));
+                }
+              }
+            }}
+          />
+          <Button onClick={openNewProductDialog}>Novo Produto</Button>
+        </div>
       </div>
 
       <Card>
@@ -255,7 +261,6 @@ const InventoryTable = () => {
         </CardContent>
       </Card>
 
-      {/* Dialog de edição/criação de produto */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -370,7 +375,6 @@ const InventoryTable = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de confirmação de exclusão */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
