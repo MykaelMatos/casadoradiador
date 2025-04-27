@@ -1,49 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import UsersList from "./users/UsersList";
+import UserDialog from "./users/UserDialog";
 
 interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "admin" | "manager" | "employee";
-  password: string;
-}
-
-interface UserFormState {
   id: string;
   name: string;
   email: string;
@@ -66,7 +29,7 @@ const UserManagement = () => {
     ];
   });
 
-  const [userForm, setUserForm] = useState<UserFormState>({
+  const [userForm, setUserForm] = useState<User>({
     id: "",
     name: "",
     email: "",
@@ -90,13 +53,7 @@ const UserManagement = () => {
   };
 
   const openEditUserDialog = (user: User) => {
-    setUserForm({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      password: user.password
-    });
+    setUserForm(user);
     setIsUserDialogOpen(true);
   };
 
@@ -126,7 +83,7 @@ const UserManagement = () => {
       setUsers(users.map(u => (u.id === userForm.id ? userForm : u)));
       toast.success(`Usuário ${userForm.name} atualizado com sucesso!`);
     } else {
-      const newUser: User = {
+      const newUser = {
         ...userForm,
         id: Math.random().toString(36).substr(2, 9)
       };
@@ -162,118 +119,21 @@ const UserManagement = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>E-mail</TableHead>
-              <TableHead>Função</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
-                  {user.role === "admin"
-                    ? "Administrador"
-                    : user.role === "manager"
-                    ? "Gerente"
-                    : "Funcionário"}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openEditUserDialog(user)}
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-red-500"
-                      onClick={() => deleteUser(user.id)}
-                    >
-                      Excluir
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <UsersList 
+          users={users}
+          onEdit={openEditUserDialog}
+          onDelete={deleteUser}
+        />
       </CardContent>
 
-      {/* Dialog para criar/editar usuário */}
-      <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {userForm.id ? "Editar Usuário" : "Novo Usuário"}
-            </DialogTitle>
-            <DialogDescription>
-              Preencha os campos para {userForm.id ? "atualizar o" : "criar um novo"} usuário.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome</Label>
-              <Input
-                id="name"
-                name="name"
-                value={userForm.name}
-                onChange={handleUserFormChange}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={userForm.email}
-                onChange={handleUserFormChange}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Função</Label>
-              <Select 
-                value={userForm.role} 
-                onValueChange={handleUserRoleChange}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Administrador</SelectItem>
-                  <SelectItem value="manager">Gerente</SelectItem>
-                  <SelectItem value="employee">Funcionário</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                value={userForm.password}
-                onChange={handleUserFormChange}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsUserDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSaveUser}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <UserDialog
+        isOpen={isUserDialogOpen}
+        onClose={() => setIsUserDialogOpen(false)}
+        onSave={handleSaveUser}
+        userForm={userForm}
+        handleUserFormChange={handleUserFormChange}
+        handleUserRoleChange={handleUserRoleChange}
+      />
     </Card>
   );
 };
