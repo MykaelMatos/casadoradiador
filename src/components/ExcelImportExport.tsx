@@ -1,7 +1,7 @@
 
 import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, Import, Export } from "lucide-react";
+import { FileSpreadsheet, Import, Download } from "lucide-react";
 import { exportToExcel, importFromExcel } from "@/utils/excelUtils";
 import { Product, addProduct } from "@/utils/stockUtils";
 import { useStore } from "@/contexts/StoreContext";
@@ -87,7 +87,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         onClick={handleExport}
         className="flex items-center gap-2"
       >
-        <Export className="h-4 w-4" />
+        <Download className="h-4 w-4" />
         Exportar Excel
       </Button>
     </div>
